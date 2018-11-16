@@ -1,22 +1,5 @@
 # AGSM: Active Geometric Shape Models
 
-## Copyright
-
-Copyright (C) 2012 Quan Wang <wangq10@rpi.edu>,
-Signal Analysis and Machine Perception Laboratory,
-Department of Electrical, Computer, and Systems Engineering,
-Rensselaer Polytechnic Institute, Troy, NY 12180, USA
-
-You are free to use this software for academic purposes if you cite our paper:
-```
-Quan Wang, Kim L. Boyer,
-The active geometric shape model: A new robust deformable shape model and its applications,
-Computer Vision and Image Understanding, Volume 116, Issue 12, December 2012, Pages 1178-1194,
-ISSN 1077-3142, 10.1016/j.cviu.2012.08.004.
-```
-
-For commercial use, please contact the authors.
-
 ## Overview
 
 This software implements active geometric shape models for line fitting,
@@ -39,6 +22,9 @@ You can also play with the AGSM Canvas app. It runs on 64-bit Windows or 64-bit 
 
 Current version: 2.3
 
+This library is also available at MathWorks:
+* https://www.mathworks.com/matlabcentral/fileexchange/38358-active-geometric-shape-models
+
 ## Useful Links
 
 For patient privacy, the CSF PC-MR images used in our paper cannot be provided in this package.
@@ -58,6 +44,23 @@ The active contours algorithm that we used for comparison can be downloaded at:
 Please also visit our project website for updates:
 
 * https://sites.google.com/site/agsmwiki/
+
+## Copyright
+
+Copyright (C) 2012 Quan Wang <wangq10@rpi.edu>,
+Signal Analysis and Machine Perception Laboratory,
+Department of Electrical, Computer, and Systems Engineering,
+Rensselaer Polytechnic Institute, Troy, NY 12180, USA
+
+You are free to use this software for academic purposes if you cite our paper:
+```
+Quan Wang, Kim L. Boyer,
+The active geometric shape model: A new robust deformable shape model and its applications,
+Computer Vision and Image Understanding, Volume 116, Issue 12, December 2012, Pages 1178-1194,
+ISSN 1077-3142, 10.1016/j.cviu.2012.08.004.
+```
+
+For commercial use, please contact the authors.
 
 ## History
 

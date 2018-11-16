@@ -25,10 +25,11 @@ Current version: 2.3
 This library is also available at MathWorks:
 * https://www.mathworks.com/matlabcentral/fileexchange/38358-active-geometric-shape-models
 
+![picture](resources/AGSM.png)
+
 ## Useful Links
 
 For patient privacy, the CSF PC-MR images used in our paper cannot be provided in this package.
-
 
 The Matlab version of the GVF algorithm can be downloaded at:
 * http://www.iacl.ece.jhu.edu/static/gvf/
@@ -42,8 +43,10 @@ The active contours algorithm that we used for comparison can be downloaded at:
 * http://www.engr.uconn.edu/~cmli/DRLSE/
 
 Please also visit our project website for updates:
-
 * https://sites.google.com/site/agsmwiki/
+
+YouTube video demo:
+* https://www.youtube.com/watch?v=c6Vto4VN5GA
 
 ## Copyright
 

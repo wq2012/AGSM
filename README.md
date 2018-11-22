@@ -7,7 +7,7 @@ circle fitting, ellipse fitting, and cubic spline fitting.
 
 This software requires Matlab and Matlab compiler.
 
-Before using, you must compile. Just run the compile.m file under the code
+Before using, you must compile. Just run the `compile.m` file under the code
 directory.
 
 Four examples of using this software:
@@ -50,11 +50,12 @@ YouTube video demo:
 
 ## Copyright
 
+```
 Copyright (C) 2012 Quan Wang <wangq10@rpi.edu>,
 Signal Analysis and Machine Perception Laboratory,
 Department of Electrical, Computer, and Systems Engineering,
 Rensselaer Polytechnic Institute, Troy, NY 12180, USA
-
+```
 You are free to use this software for academic purposes if you cite our paper:
 ```
 Quan Wang, Kim L. Boyer,
@@ -94,4 +95,3 @@ For commercial use, please contact the authors.
 3. We implemented Bresenham algorithm in C++/MEX to generate points on a line.
 
 4. All force/torque computations are re-implemented in C++/MEX, which significantly improves efficiency.
-

@@ -22,17 +22,17 @@ jobs:
         sudo apt-get install -y octave octave-dev
     - name: Run line demo
       run: |
-        cd line_fitting
+        cd code/line_fitting
         octave --no-gui demo_line_fitting.m
     - name: Run circle demo
       run: |
-        cd circle_fitting
+        cd code/circle_fitting
         octave --no-gui demo_circle_fitting.m
     - name: Run ellipse demo
       run: |
-        cd arbitrary_ellipse_fitting
+        cd code/arbitrary_ellipse_fitting
         octave --no-gui demo_ellipse_fitting.m
     - name: Run spline contour demo
       run: |
-        cd spline_contour_fitting
+        cd code/spline_contour_fitting
         octave --no-gui demo_spline_contour_fitting.m

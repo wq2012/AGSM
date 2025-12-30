@@ -11,19 +11,26 @@
 % 
 % For commercial use, please contact the authors. 
 
-function R=correctCurve(r,sigma,iter)
-%%  Correct for the radius of curvature
-%   r: detected radius
-%   R: corrected radius
-%   sigma: std of Gaussian PSF
-%   iter: number of iterations
+function R = correctCurve(r, sigma, iter)
+% CORRECTCURVE Correct for the radius of curvature.
+%    R = correctCurve(r, sigma, iter) corrects the detected radius of 
+%    curvature based on the Gaussian PSF.
+%
+%    Inputs:
+%        r - Detected radius.
+%        sigma - Standard deviation of Gaussian PSF.
+%        iter - Number of iterations for correction.
+%
+%    Outputs:
+%        R - Corrected radius.
 
-R=r;
-for it=1:iter
-    x=r*R/(sigma^2);
-    if x<100
-        R=(r+sigma^2/r)*besseli(1,x)/besseli(0,x);
-    else
-        R=(r+sigma^2/r)*(128*x*x-48*x-15)/(128*x*x+16*x+9);
+    R = r;
+    for it = 1:iter
+        x = r * R / (sigma^2);
+        if x < 100
+            R = (r + sigma^2 / r) * besseli(1, x) / besseli(0, x);
+        else
+            R = (r + sigma^2 / r) * (128*x*x - 48*x - 15) / (128*x*x + 16*x + 9);
+        end
     end
 end

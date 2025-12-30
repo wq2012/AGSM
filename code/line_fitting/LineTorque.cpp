@@ -11,7 +11,8 @@
  */
 
 /**
- * [torque,k]=LineTorque(u,v,x,y,theta)
+ * [torque, k] = LineTorque(u, v, x, y, theta)
+ * This function calculates the maximum torque and the pivot point index.
  */
 
 #include "mex.h"
@@ -22,120 +23,95 @@
 
 using namespace std;
 
-/* the main part */
+/**
+ * Calculate the maximum torque along the line and find the best pivot index k.
+ */
 double getTorque(double *u, double *v, double *x, double *y, int m, int n, int N, double theta, int &k)
 {
-    double maxTorque=0;
+    double maxTorque = 0;
     double torque;
-    int bestK;
-    double d;
-    int sgn;
-    int r,c;
-    double fx,fy;
+    int bestK = 1;
+    double cos_theta = cos(theta);
+    double sin_theta = sin(theta);
     
-    for(k=1;k<=N;k++)
+    for (int curK = 1; curK <= N; curK++)
     {
-        torque=0;
-        for(int i=0;i<N;i++)
+        torque = 0;
+        for (int i = 0; i < N; i++)
         {
-            r=(int)y[i]-1;
-            c=(int)x[i]-1;
-            fx=u[r+c*m];
-            fy=v[r+c*m];
-            d=sqrt( (x[i]-x[k-1])*(x[i]-x[k-1]) + (y[i]-y[k-1])*(y[i]-y[k-1]) );
-    
-            if(k-1==i)
+            int r = (int)y[i] - 1;
+            int c = (int)x[i] - 1;
+            
+            if (r >= 0 && r < m && c >= 0 && c < n)
             {
-                sgn=0;
-            }
-            else if(x[k-1]<x[(i>k-1?N-1:0)])
-            {
-                sgn=-1;
-            }
-            else
-            {
-                sgn=1;
-            }
+                double fx = u[r + c * m];
+                double fy = v[r + c * m];
+                double d = sqrt((x[i] - x[curK - 1]) * (x[i] - x[curK - 1]) + 
+                                (y[i] - y[curK - 1]) * (y[i] - y[curK - 1]));
+                
+                int sgn = 0;
+                if (curK - 1 == i) sgn = 0;
+                else if (x[curK - 1] < x[(i > curK - 1 ? N - 1 : 0)]) sgn = -1;
+                else sgn = 1;
 
-            torque += ( (fx*cos(theta)+fy*sin(theta))*d*sgn );
+                torque += ((fx * cos_theta + fy * sin_theta) * d * sgn);
+            }
         }
-        torque/=(N*(double)N);
-        if(fabs(torque)>fabs(maxTorque))
+        torque /= (N * (double)N);
+        if (fabs(torque) > fabs(maxTorque))
         {
-            maxTorque=torque;
-            bestK=k;
+            maxTorque = torque;
+            bestK = curK;
         }
     }
     
-    k=bestK;
+    k = bestK;
     return maxTorque;
 }
 
-/* the gateway function */
-void mexFunction( int nlhs, mxArray *plhs[],
-        int nrhs, const mxArray *prhs[])
+void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
-    double *u;
-    double *v;
-    double *x;
-    double *y;
-    double theta;
-    int m; // number of rows
-    int n; // number of columns
-    int N; // number of points on line
-    double torque;
+    /* Check for proper number of arguments */
+    if (nrhs != 5)
+    {
+        mexErrMsgIdAndTxt("AGSM:LineTorque:invalidNumInputs", "Five inputs required: u, v, x, y, theta.");
+    }
+    if (nlhs > 2)
+    {
+        mexErrMsgIdAndTxt("AGSM:LineTorque:invalidNumOutputs", "At most two outputs: torque, k.");
+    }
+
+    double *u = mxGetPr(prhs[0]);
+    double *v = mxGetPr(prhs[1]);
+    int m = (int)mxGetM(prhs[0]);
+    int n = (int)mxGetN(prhs[0]);
+
+    if (m != mxGetM(prhs[1]) || n != mxGetN(prhs[1]))
+    {
+        mexErrMsgIdAndTxt("AGSM:LineTorque:invalidInputDimension", "Input u and v must have same dimensions.");
+    }
+
+    double *x = mxGetPr(prhs[2]);
+    double *y = mxGetPr(prhs[3]);
+    int N = (int)mxGetN(prhs[2]);
+
+    if (mxGetM(prhs[2]) != 1 || mxGetM(prhs[3]) != 1 || mxGetN(prhs[3]) != N)
+    {
+        mexErrMsgIdAndTxt("AGSM:LineTorque:invalidInputDimension", "Input x and y must be 1xN vectors of same size.");
+    }
+
+    if (!mxIsDouble(prhs[4]) || mxIsComplex(prhs[4]) || mxGetN(prhs[4]) * mxGetM(prhs[4]) != 1)
+    {
+        mexErrMsgIdAndTxt("AGSM:LineTorque:thetaNotScalar", "Input theta must be a scalar.");
+    }
+    double theta = mxGetScalar(prhs[4]);
+
     int k;
-    
-    /*  check for proper number of arguments */
-    if(nrhs!=5)
+    double torque = getTorque(u, v, x, y, m, n, N, theta, k);
+
+    plhs[0] = mxCreateDoubleScalar(torque);
+    if (nlhs > 1)
     {
-        mexErrMsgIdAndTxt( "MATLAB:LineNormalForce:invalidNumInputs",
-                "Five inputs required.");
+        plhs[1] = mxCreateDoubleScalar((double)k);
     }
-    if(nlhs>2)
-    {
-        mexErrMsgIdAndTxt( "MATLAB:LineNormalForce:invalidNumOutputs",
-                "At most two outputs.");
-    }
-    
-    /*  get u and v  */
-    u=mxGetPr(prhs[0]);
-    v=mxGetPr(prhs[1]);
-    m=(int)mxGetM(prhs[0]);
-    n=(int)mxGetN(prhs[0]);
-    if(m!=mxGetM(prhs[1]) || n!=mxGetN(prhs[1]))
-    {
-        mexErrMsgIdAndTxt( "MATLAB:LineNormalForce:invalidInputDimension",
-                "Input u and v should have same dimensions.");
-    }
-    
-    /*  get x and y  */
-    x=mxGetPr(prhs[2]);
-    y=mxGetPr(prhs[3]);
-    N=mxGetN(prhs[2]);
-    if(mxGetM(prhs[2])!=1 || mxGetM(prhs[3])!=1 || mxGetN(prhs[3])!=N)
-    {
-        mexErrMsgIdAndTxt( "MATLAB:LineNormalForce:invalidInputDimension",
-                "Input x and y should have same dimensions 1*N.");
-    }
-    
-    /*  get theta  */
-    if( !mxIsDouble(prhs[4]) || mxIsComplex(prhs[4]) ||
-            mxGetN(prhs[4])*mxGetM(prhs[4])!=1 )
-    {
-        mexErrMsgIdAndTxt( "MATLAB:LineInImage:thetaNotScalar",
-                "Input theta must be a scalar.");
-    }
-    theta=mxGetScalar(prhs[4]);
-    
-    /*  call the C++ subroutine  */
-    torque=getTorque(u,v,x,y,m,n,N,theta,k);
-    
-    /*  output  */
-    plhs[0] = mxCreateDoubleMatrix(1, 1, mxREAL);
-    plhs[1] = mxCreateDoubleMatrix(1, 1, mxREAL);
-    double *result1=mxGetPr(plhs[0]);
-    double *result2=mxGetPr(plhs[1]);
-    result1[0]=torque;
-    result2[0]=(double)k;
 }

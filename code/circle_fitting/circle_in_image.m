@@ -11,26 +11,40 @@
 %
 % For commercial use, please contact the authors.
 
-function [x,y,theta]=circle_in_image(m,n,xc,yc,r)
+function [x, y, theta] = circle_in_image(m, n, xc, yc, r)
+% CIRCLE_IN_IMAGE Return discrete coordinates of points on a circle.
+%    [x, y, theta] = circle_in_image(m, n, xc, yc, r) generates points
+%    on a circle that fall within the image boundaries (m, n).
+%
+%    The circle equation is:
+%       x = xc + r * cos(theta)
+%       y = yc + r * sin(theta)
+%
+%    Inputs:
+%        m - Number of image rows.
+%        n - Number of image columns.
+%        xc - X-coordinate of center.
+%        yc - Y-coordinate of center.
+%        r - Radius of circle.
+%
+%    Outputs:
+%        x - X-coordinates of points on circle.
+%        y - Y-coordinates of points on circle.
+%        theta - Angles corresponding to points.
 
-%%  Return discrete coordinates of points on a circle.
-%   The function of the circle : 
-%       x=xc+r*cos(theta)
-%       y=yc+r*sin(theta)
-%   m: number of image rows
-%   n: number of image columns
-
-theta=linspace(0,2*pi,round(2*pi*r));
-data=[xc+r*cos(theta);yc+r*sin(theta)];
-data=round(data);
-[data, index]=unique(data','rows'); % removed repeated data
-data=data';
-x=data(1,:);
-y=data(2,:);
-theta=theta(index);
-[theta, index]=sort(theta);
-x=x(index);
-y=y(index);
-if min(x)<1 || min(y)<1 || max(x)>n || max(y)>m
-    disp('Error: Contour out of image!');
+    theta = linspace(0, 2 * pi, round(2 * pi * r));
+    data = [xc + r * cos(theta); yc + r * sin(theta)];
+    data = round(data);
+    [data, index] = unique(data', 'rows'); % Remove repeated points
+    data = data';
+    x = data(1, :);
+    y = data(2, :);
+    theta = theta(index);
+    [theta, index] = sort(theta);
+    x = x(index);
+    y = y(index);
+    
+    if min(x) < 1 || min(y) < 1 || max(x) > n || max(y) > m
+        warning('AGSM:CircleInImage:outOfBounds', 'Contour out of image boundaries!');
+    end
 end

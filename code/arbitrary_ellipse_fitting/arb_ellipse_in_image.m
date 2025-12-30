@@ -11,26 +11,43 @@
 % 
 % For commercial use, please contact the authors. 
 
-function [x,y,theta]=arb_ellipse_in_image(m,n,xc,yc,a,b,phi)
-%%  Return discrete coordinates of points on an arbitrary ellipse.
-%   The parametric equations of the arbitrary ellipse: 
-%       x=xc+a*cos(theta)*cos(phi)-b*sin(theta)*sin(phi)
-%       y=yc+a*cos(theta)*sin(phi)+b*sin(theta)*cos(phi)
-%   m: number of image rows
-%   n: number of image columns
+function [x, y, theta] = arb_ellipse_in_image(m, n, xc, yc, a, b, phi)
+% ARB_ELLIPSE_IN_IMAGE Return discrete coordinates of an arbitrary ellipse.
+%    [x, y, theta] = arb_ellipse_in_image(m, n, xc, yc, a, b, phi) 
+%    generates points on an ellipse that fall within the image boundaries.
+%
+%    The parametric equations of the ellipse:
+%       x = xc + a * cos(theta) * cos(phi) - b * sin(theta) * sin(phi)
+%       y = yc + a * cos(theta) * sin(phi) + b * sin(theta) * cos(phi)
+%
+%    Inputs:
+%        m - Number of image rows.
+%        n - Number of image columns.
+%        xc - X-coordinate of center.
+%        yc - Y-coordinate of center.
+%        a - Semi-major axis.
+%        b - Semi-minor axis.
+%        phi - Orientation angle in radians.
+%
+%    Outputs:
+%        x - X-coordinates of points on ellipse.
+%        y - Y-coordinates of points on ellipse.
+%        theta - Angles corresponding to points.
 
-theta=linspace(0,2*pi,round(2*pi*max([a b])));
-data=[xc+a*cos(theta)*cos(phi)-b*sin(theta)*sin(phi);...
-    yc+a*cos(theta)*sin(phi)+b*sin(theta)*cos(phi)];
-data=round(data);
-[data,index]=unique(data','rows'); % remove repeated points
-data=data';
-x=data(1,:);
-y=data(2,:);
-theta=theta(index);
-[theta,index]=sort(theta);
-x=x(index);
-y=y(index);
-if min(x)<1 || min(y)<1 || max(x)>n || max(y)>m
-    disp('Error: Contour out of image!');
+    theta = linspace(0, 2 * pi, round(2 * pi * max([a, b])));
+    data = [xc + a * cos(theta) * cos(phi) - b * sin(theta) * sin(phi); ...
+            yc + a * cos(theta) * sin(phi) + b * sin(theta) * cos(phi)];
+    data = round(data);
+    [data, index] = unique(data', 'rows'); % Remove repeated points
+    data = data';
+    x = data(1, :);
+    y = data(2, :);
+    theta = theta(index);
+    [theta, index] = sort(theta);
+    x = x(index);
+    y = y(index);
+    
+    if min(x) < 1 || min(y) < 1 || max(x) > n || max(y) > m
+        warning('AGSM:ArbEllipseInImage:outOfBounds', 'Contour out of image boundaries!');
+    end
 end

@@ -11,14 +11,19 @@
 % 
 % For commercial use, please contact the authors. 
 
-function GI=gaussianBlur(I,s)
-%%  Perform Gaussian blur
-%   I: input image
-%   s: standard deviation (sigma)
-%   GI: blurred image
+function GI = gaussianBlur(I, s)
+% GAUSSIANBLUR Perform Gaussian blur on an image.
+%    GI = gaussianBlur(I, s) applies a Gaussian filter to the input image.
+%
+%    Inputs:
+%        I - Input image.
+%        s - Standard deviation (sigma) of the Gaussian kernel.
+%
+%    Outputs:
+%        GI - Blurred results.
 
-h=fspecial('gaussian',ceil(s)*3+1,s);
-
-GI=imfilter(I,h,'replicate');
+    h = fspecial('gaussian', ceil(s) * 3 + 1, s);
+    GI = imfilter(I, h, 'replicate');
+end
 
 

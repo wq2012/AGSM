@@ -1,3 +1,8 @@
+% Copyright (C) 2012 Quan Wang <wangq10@rpi.edu>
+% Compilation script for AGSM MEX files.
+% This script compiles all C++ source files into MEX benchmarks 
+% for both MATLAB and GNU Octave environments.
+
 if is_octave()
     mex force_field/GVF.cpp -o force_field/GVF;
     mex force_field/BoundMirrorEnsure.cpp -o force_field/BoundMirrorEnsure;

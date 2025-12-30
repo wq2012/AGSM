@@ -1,29 +1,67 @@
-function [theta,s]=ransac_TLS(x,y)
+% Copyright (C) 2012 Quan Wang <wangq10@rpi.edu>,
+% Signal Analysis and Machine Perception Laboratory,
+% Department of Electrical, Computer, and Systems Engineering,
+% Rensselaer Polytechnic Institute, Troy, NY 12180, USA
+%
+% You are free to use this software for academic purposes if you cite our paper:
+% Quan Wang, Kim L. Boyer,
+% The active geometric shape model: A new robust deformable shape model and its applications,
+% Computer Vision and Image Understanding, Volume 116, Issue 12, December 2012, Pages 1178-1194,
+% ISSN 1077-3142, 10.1016/j.cviu.2012.08.004.
+%
+% For commercial use, please contact the authors.
 
-trial=100;
-train=0.5;
-accept=0.2;
-reuse=0.5;
+function [theta, s, inliers] = ransac_TLS(x, y, n, t, d)
+% RANSAC_TLS Robust line fitting using RANSAC and Total Least Squares.
+%    [theta, s, inliers] = ransac_TLS(x, y, n, t, d) fits a line to
+%    points (x, y) while being robust to outliers.
+%
+%    Inputs:
+%        x, y - Coordinates of points.
+%        n - Number of iterations (default: 100).
+%        t - Distance threshold for inliers (default: 2.0).
+%        d - Minimum number of inliers required (default: round(0.5*length(x))).
+%
+%    Outputs:
+%        theta - Angle of the fitted line.
+%        s - Offset of the fitted line.
+%        inliers - Logical array of inlier indices.
 
-N=length(x);
-Ntrain=round(N*train);
+    if nargin < 3, n = 100; end
+    if nargin < 4, t = 2.0; end
+    if nargin < 5, d = round(0.5 * length(x)); end
 
-vote=zeros(N,1);
+    inliers = [];
+    theta = 0;
+    s = 0;
+    max_inliers = 0;
+    N = length(x);
+    if N < 2, return; end
 
-for t=1:trial
-    rp=randperm(N);
-    train_index=rp(1:Ntrain);
-    test_index=rp(Ntrain+1:end);
+    for i = 1:n
+        % Randomly select 2 points
+        idx = randperm(N, 2);
+        x_sample = x(idx);
+        y_sample = y(idx);
+        
+        % Fit line to these 2 points
+        [theta_tmp, s_tmp] = totalLeastSquares(x_sample, y_sample);
+        
+        % Check inliers
+        dist = abs(x * cos(theta_tmp) + y * sin(theta_tmp) - s_tmp);
+        inliers_tmp = dist < t;
+        num_inliers = sum(inliers_tmp);
+        
+        if num_inliers > max_inliers && num_inliers >= d
+            max_inliers = num_inliers;
+            inliers = inliers_tmp;
+            theta = theta_tmp;
+            s = s_tmp;
+        end
+    end
     
-    [theta_TLS, s_TLS]=totalLeastSquares(x(train_index),y(train_index));
-    test_error=abs( x(test_index)*cos(theta_TLS)+y(test_index)*sin(theta_TLS)-s_TLS );
-    [~,index]=sort(test_error);
-    index=index(1:round(length(index)*accept));
-    index=rp(index+Ntrain);
-    vote(index)=vote(index)+1;
+    % Re-fit using all inliers
+    if ~isempty(inliers)
+        [theta, s] = totalLeastSquares(x(inliers), y(inliers));
+    end
 end
-
-[~,index]=sort(vote,'descend');
-index=index(1:round(N*reuse));
-[theta, s]=totalLeastSquares(x(index),y(index));
-

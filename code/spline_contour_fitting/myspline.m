@@ -11,12 +11,20 @@
 % 
 % For commercial use, please contact the authors. 
 
-function DD=myspline(D,theta)
-%%  Get the distances to center of a cubic spline contour
-%   D: distances from landmarks to center
-%   theta: angles of all points on contour
-%   DD: resulting distances
-NN=length(D);
-lm_theta=linspace(0,2*pi,NN+1);
-lm_theta=[lm_theta(end-3:end-1)-2*pi, lm_theta, lm_theta(2:3)+2*pi];
-DD=spline(lm_theta,[D(end-2:end), D, D(1:3)],theta);
+function DD = myspline(D, theta)
+% MYSPLINE Get the distances to center of a cubic spline contour.
+%    DD = myspline(D, theta) interpolates the distance to the center
+%    for all points on a cubic spline contour.
+%
+%    Inputs:
+%        D - Distances from landmarks to the center.
+%        theta - Angles of all points on the contour.
+%
+%    Outputs:
+%        DD - Resulting interpolated distances.
+
+    NN = length(D);
+    lm_theta = linspace(0, 2 * pi, NN + 1);
+    lm_theta = [lm_theta(end - 3 : end - 1) - 2 * pi, lm_theta, lm_theta(2 : 3) + 2 * pi];
+    DD = spline(lm_theta, [D(end - 2 : end), D, D(1 : 3)], theta);
+end

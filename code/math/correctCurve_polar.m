@@ -11,20 +11,29 @@
 % 
 % For commercial use, please contact the authors. 
 
-function R=correctCurve_polar(r,r1,r2,sigma,iter)
-%%  Correct for the radius of curvature in polar system
-%   r: detected radius
-%   r1: 1st order derivative of r w.r.t. theta
-%   r2: 2nd order derivative of r w.r.t. theta
-%   R: corrected radius
-%   sigma: std of Gaussian PSF
-%   iter: number of iterations
+function R = correctCurve_polar(r, r1, r2, sigma, iter)
+% CORRECTCURVE_POLAR Correct for the radius of curvature in polar system.
+%    R = correctCurve_polar(r, r1, r2, sigma, iter) corrects the detected 
+%    radius in a polar coordinate system using derivatives.
+%
+%    Inputs:
+%        r - Detected radius.
+%        r1 - 1st order derivative of r w.r.t. theta.
+%        r2 - 2nd order derivative of r w.r.t. theta.
+%        sigma - Standard deviation of Gaussian PSF.
+%        iter - Number of iterations.
+%
+%    Outputs:
+%        R - Corrected radius.
 
-kappa=(r^2+2*r1^2-r*r2)/(r^2+r1^2).^1.5;
-Kappa=1/correctCurve(abs(1/kappa),sigma,iter);
+    kappa = (r^2 + 2*r1^2 - r*r2) / (r^2 + r1^2).^1.5;
+    Kappa = 1 / correctCurve(abs(1 / kappa), sigma, iter);
 
-if kappa>0
-    R=r-1/abs(kappa)+1/Kappa;
-elseif kappa<0
-    R=r+1/abs(kappa)-1/Kappa;
+    if kappa > 0
+        R = r - 1 / abs(kappa) + 1 / Kappa;
+    elseif kappa < 0
+        R = r + 1 / abs(kappa) - 1 / Kappa;
+    else
+        R = r;
+    end
 end

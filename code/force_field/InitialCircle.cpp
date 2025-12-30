@@ -11,17 +11,9 @@
  */
 
 /**
- * This is the C++/MEX code for computing initial guesses of circle parameters
- *
- * compile:
- *     mex InitialCircle.cpp
- *
- * usage:
- *     [xc,yc,r] = InitialCircle(f)
- *       f: 2D energy field (or gradient field)
- *       xc: initial guess of x-coordinate of center
- *       yc: initial guess of y-coordinate of center
- *       r: initial guess of radius
+ * [xc, yc, r] = InitialCircle(f)
+ * This function computes initial guesses for circle parameters (center and radius) 
+ * given a 2D intensity or energy field.
  */
 
 #include "mex.h"
@@ -30,86 +22,83 @@
 #include <cmath>
 #include <iostream>
 
+using namespace std;
+
+/**
+ * Core logic for initial guess based on center of gravity and average distance.
+ */
 void guess(double *I, int m, int n, double *xc_, double *yc_, double *r_)
 {
-    double xc=0;
-    double yc=0;
-    double r=0;
-    double sumI=0;
+    double xc = 0;
+    double yc = 0;
+    double r = 0;
+    double sumI = 0;
     
-    for(int i=0;i<m;i++)
+    for (int i = 0; i < m; i++)
     {
-        for(int j=0;j<n;j++)
+        for (int j = 0; j < n; j++)
         {
-            xc+=(j*I[i+j*m]);
-            yc+=(i*I[i+j*m]);
-            sumI+=I[i+j*m];
+            xc += (j * I[i + j * m]);
+            yc += (i * I[i + j * m]);
+            sumI += I[i + j * m];
         }
     }
-    xc/=sumI;
-    yc/=sumI;
     
-    for(int i=0;i<m;i++)
+    if (sumI != 0)
     {
-        for(int j=0;j<n;j++)
+        xc /= sumI;
+        yc /= sumI;
+    }
+    else
+    {
+        xc = n / 2.0;
+        yc = m / 2.0;
+    }
+    
+    for (int i = 0; i < m; i++)
+    {
+        for (int j = 0; j < n; j++)
         {
-            r+=(sqrt((i-yc)*(i-yc)+(j-xc)*(j-xc))*I[i+j*m]);
+            r += (sqrt((i - yc) * (i - yc) + (j - xc) * (j - xc)) * I[i + j * m]);
         }
     }
-    r/=sumI;
     
-    *xc_=xc;
-    *yc_=yc;
-    *r_=r;
+    if (sumI != 0) r /= sumI;
+    else r = min(m, n) / 4.0;
+    
+    *xc_ = xc;
+    *yc_ = yc;
+    *r_ = r;
 }
 
-/* the gateway function */
-void mexFunction( int nlhs, mxArray *plhs[],
-        int nrhs, const mxArray *prhs[])
+void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
-    double *f; // input matrix
-    int m;
-    int n;
-    
-    double *xc;
-    double *yc;
-    double *r;
-
-    /*  check for proper number of arguments */
-    if(nrhs!=1)
+    /* Check for proper number of arguments */
+    if (nrhs != 1)
     {
-        mexErrMsgIdAndTxt( "MATLAB:InitialCircle:invalidNumInputs",
-                "One input required.");
+        mexErrMsgIdAndTxt("AGSM:InitialCircle:invalidNumInputs", "One input required.");
     }
-    if(nlhs!=3)
+    if (nlhs != 3)
     {
-        mexErrMsgIdAndTxt( "MATLAB:InitialCircle:invalidNumOutputs",
-                "Three outputs required.");
-    }
-    
-    /*  get f */
-    f=mxGetPr(prhs[0]);
-    m=(int)mxGetM(prhs[0]);
-    n=(int)mxGetN(prhs[0]);
-    if(m<5 || n<5)
-    {
-        mexErrMsgIdAndTxt( "MATLAB:InitialCircle:fWrongSize",
-                "Input f is too small.");
+        mexErrMsgIdAndTxt("AGSM:InitialCircle:invalidNumOutputs", "Three outputs required.");
     }
 
-    /*  set the output pointers to the output matrices */
-    plhs[0] = mxCreateDoubleMatrix(1, 1, mxREAL);
-    plhs[1] = mxCreateDoubleMatrix(1, 1, mxREAL);
-    plhs[2] = mxCreateDoubleMatrix(1, 1, mxREAL);
+    double *f = mxGetPr(prhs[0]);
+    int m = (int)mxGetM(prhs[0]);
+    int n = (int)mxGetN(prhs[0]);
+
+    if (m < 5 || n < 5)
+    {
+        mexErrMsgIdAndTxt("AGSM:InitialCircle:matrixTooSmall", "Input matrix is too small.");
+    }
+
+    plhs[0] = mxCreateDoubleScalar(0);
+    plhs[1] = mxCreateDoubleScalar(0);
+    plhs[2] = mxCreateDoubleScalar(0);
     
-    /*  create C++ pointers to copies of the output matrices */
-    xc=mxGetPr(plhs[0]);
-    yc=mxGetPr(plhs[1]);
-    r=mxGetPr(plhs[2]);
-    
-    /*  call the C++ subroutine */
-    guess(f,m,n,xc,yc,r);
-    
-    return;
+    double *xc = mxGetPr(plhs[0]);
+    double *yc = mxGetPr(plhs[1]);
+    double *r = mxGetPr(plhs[2]);
+
+    guess(f, m, n, xc, yc, r);
 }
-

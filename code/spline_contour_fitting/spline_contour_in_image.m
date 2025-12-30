@@ -11,30 +11,38 @@
 % 
 % For commercial use, please contact the authors. 
 
-function [x,y,theta]=spline_contour_in_image(m,n,xc,yc,D)
-%%  Return discrete coordinates of points on a spline contour.
-%   The functions of the spline contour: 
-%       x=xc+xspline(D(1),...,D(N))
-%       y=yc+yspline(D(1),...,D(N))
-%   m: number of rows of image
-%   n: number of columns of image
-%   D: vector of the distances from landmarks to center (row vector)
+function [x, y, theta] = spline_contour_in_image(m, n, xc, yc, D)
+% SPLINE_CONTOUR_IN_IMAGE Return discrete coordinates of a spline contour.
+%    [x, y, theta] = spline_contour_in_image(m, n, xc, yc, D) generates
+%    points on a cubic spline contour that fall within the image boundaries.
+%
+%    Inputs:
+%        m - Number of image rows.
+%        n - Number of image columns.
+%        xc - X-coordinate of center.
+%        yc - Y-coordinate of center.
+%        D - Vector of distances from landmarks to center.
+%
+%    Outputs:
+%        x - X-coordinates of points on contour.
+%        y - Y-coordinates of points on contour.
+%        theta - Angles corresponding to points.
 
-theta=linspace(0,2*pi,round( 2*pi*max(D) ));
-DD=myspline(D,theta);
+    theta = linspace(0, 2 * pi, round(2 * pi * max(D)));
+    DD = myspline(D, theta);
 
-data=[xc+DD.*cos(theta);...
-    yc+DD.*sin(theta)];
-data=round(data);
-[data, index]=unique(data','rows'); % remove repeated points
-data=data';
-x=data(1,:);
-y=data(2,:);
-theta=theta(index);
-[theta, index]=sort(theta);
-x=x(index);
-y=y(index);
-if min(x)<1 || min(y)<1 || max(x)>n || max(y)>m
-    disp('Error: Contour out of image!');
+    data = [xc + DD .* cos(theta); yc + DD .* sin(theta)];
+    data = round(data);
+    [data, index] = unique(data', 'rows'); % Remove repeated points
+    data = data';
+    x = data(1, :);
+    y = data(2, :);
+    theta = theta(index);
+    [theta, index] = sort(theta);
+    x = x(index);
+    y = y(index);
+    
+    if min(x) < 1 || min(y) < 1 || max(x) > n || max(y) > m
+        warning('AGSM:SplineContourInImage:outOfBounds', 'Contour out of image boundaries!');
+    end
 end
-

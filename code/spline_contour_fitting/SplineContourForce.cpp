@@ -11,7 +11,8 @@
  */
 
 /**
- * force=SplineContourForce(u,v,x,y,theta)
+ * force = SplineContourForce(u, v, x, y, theta)
+ * This function calculates the normal force on a spline contour.
  */
 
 #include "mex.h"
@@ -22,78 +23,65 @@
 
 using namespace std;
 
-/* the main part */
+/**
+ * Calculate the average normal force along the given points of a spline contour.
+ */
 double getForce(double *u, double *v, double *x, double *y, double *theta, int m, int n, int N)
 {
-    double force=0;
-    int r,c;
-    double fx,fy;
-    for(int i=0;i<N;i++)
+    double force = 0;
+    int r, c;
+    double fx, fy;
+    
+    for (int i = 0; i < N; i++)
     {
-        r=(int)y[i]-1;
-        c=(int)x[i]-1;
-        fx=u[r+c*m];
-        fy=v[r+c*m];
-        force+=(fx*cos(theta[i])+fy*sin(theta[i]));
+        r = (int)y[i] - 1;
+        c = (int)x[i] - 1;
+        
+        if (r >= 0 && r < m && c >= 0 && c < n)
+        {
+            fx = u[r + c * m];
+            fy = v[r + c * m];
+            force += (fx * cos(theta[i]) + fy * sin(theta[i]));
+        }
     }
-    return force/N;
+    return N > 0 ? force / N : 0;
 }
 
-/* the gateway function */
-void mexFunction( int nlhs, mxArray *plhs[],
-        int nrhs, const mxArray *prhs[])
+void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
-    double *u;
-    double *v;
-    double *x;
-    double *y;
-    double *theta;
-    double force;
-    int m; // number of rows
-    int n; // number of columns
-    int N; // number of points on line
-    
-    /*  check for proper number of arguments */
-    if(nrhs!=5)
+    /* Check for proper number of arguments */
+    if (nrhs != 5)
     {
-        mexErrMsgIdAndTxt( "MATLAB:SplineContourForce:invalidNumInputs",
-                "Five inputs required.");
+        mexErrMsgIdAndTxt("AGSM:SplineContourForce:invalidNumInputs", "Five inputs required: u, v, x, y, theta.");
     }
-    if(nlhs>1)
+    if (nlhs > 1)
     {
-        mexErrMsgIdAndTxt( "MATLAB:SplineContourForce:invalidNumOutputs",
-                "At most one output.");
-    }
-    
-    /*  get u and v  */
-    u=mxGetPr(prhs[0]);
-    v=mxGetPr(prhs[1]);
-    m=(int)mxGetM(prhs[0]);
-    n=(int)mxGetN(prhs[0]);
-    if(m!=mxGetM(prhs[1]) || n!=mxGetN(prhs[1]))
-    {
-        mexErrMsgIdAndTxt( "MATLAB:SplineContourForce:invalidInputDimension",
-                "Input u and v should have same dimensions.");
-    }
-    
-    /*  get x, y and theta  */
-    x=mxGetPr(prhs[2]);
-    y=mxGetPr(prhs[3]);
-    theta=mxGetPr(prhs[4]);
-    N=mxGetN(prhs[2]);
-    if(mxGetM(prhs[2])!=1 || mxGetM(prhs[3])!=1 || mxGetM(prhs[4])!=1 || mxGetN(prhs[3])!=N || mxGetN(prhs[4])!=N)
-    {
-        mexErrMsgIdAndTxt( "MATLAB:SplineContourForce:invalidInputDimension",
-                "Input x, y and theta should have same dimensions 1*N.");
+        mexErrMsgIdAndTxt("AGSM:SplineContourForce:invalidNumOutputs", "At most one output.");
     }
 
+    double *u = mxGetPr(prhs[0]);
+    double *v = mxGetPr(prhs[1]);
+    int m = (int)mxGetM(prhs[0]);
+    int n = (int)mxGetN(prhs[0]);
 
-    /*  call the C++ subroutine  */
-    force=getForce(u,v,x,y,theta,m,n,N);
-    
-    /*  output  */
-    plhs[0] = mxCreateDoubleMatrix(1, 1, mxREAL);
-    double *result=mxGetPr(plhs[0]);
-    result[0]=force;
+    if (m != mxGetM(prhs[1]) || n != mxGetN(prhs[1]))
+    {
+        mexErrMsgIdAndTxt("AGSM:SplineContourForce:invalidInputDimension", "Input u and v must have same dimensions.");
+    }
 
+    double *x = mxGetPr(prhs[2]);
+    double *y = mxGetPr(prhs[3]);
+    double *theta = mxGetPr(prhs[4]);
+    int N = (int)mxGetN(prhs[2]);
+
+    if (mxGetM(prhs[2]) != 1 || mxGetM(prhs[3]) != 1 || mxGetM(prhs[4]) != 1 || 
+        mxGetN(prhs[3]) != N || mxGetN(prhs[4]) != N)
+    {
+        mexErrMsgIdAndTxt("AGSM:SplineContourForce:invalidInputDimension", 
+            "Input x, y, and theta should have same dimensions 1xN.");
+    }
+
+    double force = getForce(u, v, x, y, theta, m, n, N);
+
+    plhs[0] = mxCreateDoubleScalar(force);
 }

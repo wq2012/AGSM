@@ -11,7 +11,8 @@
  */
 
 /**
- * force=LineNormalForce(u,v,x,y,theta)
+ * force = LineNormalForce(u, v, x, y, theta)
+ * This function calculates the normal force on a line.
  */
 
 #include "mex.h"
@@ -22,84 +23,71 @@
 
 using namespace std;
 
-/* the main part */
+/**
+ * Calculate the average normal force along the given points.
+ */
 double getNormalForce(double *u, double *v, double *x, double *y, int m, int n, int N, double theta)
 {
-    double force=0;
-    int r,c;
-    double fx,fy;
-    for(int i=0;i<N;i++)
+    double force = 0;
+    int r, c;
+    double fx, fy;
+    double cos_theta = cos(theta);
+    double sin_theta = sin(theta);
+    
+    for (int i = 0; i < N; i++)
     {
-        r=(int)y[i]-1;
-        c=(int)x[i]-1;
-        fx=u[r+c*m];
-        fy=v[r+c*m];
-        force+=(fx*cos(theta)+fy*sin(theta));
+        r = (int)y[i] - 1;
+        c = (int)x[i] - 1;
+        
+        // Ensure coordinates are within bounds
+        if (r >= 0 && r < m && c >= 0 && c < n)
+        {
+            fx = u[r + c * m];
+            fy = v[r + c * m];
+            force += (fx * cos_theta + fy * sin_theta);
+        }
     }
-    return force/N;
+    return N > 0 ? force / N : 0;
 }
 
-/* the gateway function */
-void mexFunction( int nlhs, mxArray *plhs[],
-        int nrhs, const mxArray *prhs[])
+void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
-    double *u;
-    double *v;
-    double *x;
-    double *y;
-    double theta;
-    int m; // number of rows
-    int n; // number of columns
-    int N; // number of points on line
-    double force;
-    
-    /*  check for proper number of arguments */
-    if(nrhs!=5)
+    /* Check for proper number of arguments */
+    if (nrhs != 5)
     {
-        mexErrMsgIdAndTxt( "MATLAB:LineNormalForce:invalidNumInputs",
-                "Five inputs required.");
+        mexErrMsgIdAndTxt("AGSM:LineNormalForce:invalidNumInputs", "Five inputs required: u, v, x, y, theta.");
     }
-    if(nlhs>1)
+    if (nlhs > 1)
     {
-        mexErrMsgIdAndTxt( "MATLAB:LineNormalForce:invalidNumOutputs",
-                "At most one output.");
+        mexErrMsgIdAndTxt("AGSM:LineNormalForce:invalidNumOutputs", "At most one output.");
     }
-    
-    /*  get u and v  */
-    u=mxGetPr(prhs[0]);
-    v=mxGetPr(prhs[1]);
-    m=(int)mxGetM(prhs[0]);
-    n=(int)mxGetN(prhs[0]);
-    if(m!=mxGetM(prhs[1]) || n!=mxGetN(prhs[1]))
+
+    double *u = mxGetPr(prhs[0]);
+    double *v = mxGetPr(prhs[1]);
+    int m = (int)mxGetM(prhs[0]);
+    int n = (int)mxGetN(prhs[0]);
+
+    if (m != mxGetM(prhs[1]) || n != mxGetN(prhs[1]))
     {
-        mexErrMsgIdAndTxt( "MATLAB:LineNormalForce:invalidInputDimension",
-                "Input u and v should have same dimensions.");
+        mexErrMsgIdAndTxt("AGSM:LineNormalForce:invalidInputDimension", "Input u and v must have same dimensions.");
     }
-    
-    /*  get x and y  */
-    x=mxGetPr(prhs[2]);
-    y=mxGetPr(prhs[3]);
-    N=mxGetN(prhs[2]);
-    if(mxGetM(prhs[2])!=1 || mxGetM(prhs[3])!=1 || mxGetN(prhs[3])!=N)
+
+    double *x = mxGetPr(prhs[2]);
+    double *y = mxGetPr(prhs[3]);
+    int N = (int)mxGetN(prhs[2]);
+
+    if (mxGetM(prhs[2]) != 1 || mxGetM(prhs[3]) != 1 || mxGetN(prhs[3]) != N)
     {
-        mexErrMsgIdAndTxt( "MATLAB:LineNormalForce:invalidInputDimension",
-                "Input x and y should have same dimensions 1*N.");
+        mexErrMsgIdAndTxt("AGSM:LineNormalForce:invalidInputDimension", "Input x and y must be 1xN vectors of same size.");
     }
-    
-    /*  get theta  */
-    if( !mxIsDouble(prhs[4]) || mxIsComplex(prhs[4]) ||
-            mxGetN(prhs[4])*mxGetM(prhs[4])!=1 )
+
+    if (!mxIsDouble(prhs[4]) || mxIsComplex(prhs[4]) || mxGetN(prhs[4]) * mxGetM(prhs[4]) != 1)
     {
-        mexErrMsgIdAndTxt( "MATLAB:LineInImage:thetaNotScalar",
-                "Input theta must be a scalar.");
+        mexErrMsgIdAndTxt("AGSM:LineNormalForce:thetaNotScalar", "Input theta must be a scalar.");
     }
-    theta=mxGetScalar(prhs[4]);
-    
-    /*  call the C++ subroutine  */
-    force=getNormalForce(u,v,x,y,m,n,N,theta);
-    
-    /*  output  */
-    plhs[0] = mxCreateDoubleMatrix(1, 1, mxREAL);
-    double *result=mxGetPr(plhs[0]);
-    result[0]=force;
+    double theta = mxGetScalar(prhs[4]);
+
+    double force = getNormalForce(u, v, x, y, m, n, N, theta);
+
+    plhs[0] = mxCreateDoubleScalar(force);
 }

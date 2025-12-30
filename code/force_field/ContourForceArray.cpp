@@ -11,7 +11,8 @@
  */
 
 /**
- * F=ContourForceArray(u,v,x,y)
+ * F = ContourForceArray(u, v, x, y)
+ * This function returns the force vectors at specified contour points.
  */
 
 #include "mex.h"
@@ -22,71 +23,63 @@
 
 using namespace std;
 
-/* the main part */
+/**
+ * Extract force field values at specified contour coordinates.
+ */
 void getForceArray(double *u, double *v, double *x, double *y, int m, int n, int N, double *F)
 {
-    int r,c;
-    for(int i=0;i<N;i++)
+    int r, c;
+    for (int i = 0; i < N; i++)
     {
-        r=(int)y[i]-1;
-        c=(int)x[i]-1;
-        F[i]=u[r+c*m];
-        F[i+N]=v[r+c*m];
+        r = (int)y[i] - 1;
+        c = (int)x[i] - 1;
+        
+        if (r >= 0 && r < m && c >= 0 && c < n)
+        {
+            F[i] = u[r + c * m];
+            F[i + N] = v[r + c * m];
+        }
+        else
+        {
+            F[i] = 0;
+            F[i + N] = 0;
+        }
     }
-
 }
 
-/* the gateway function */
-void mexFunction( int nlhs, mxArray *plhs[],
-        int nrhs, const mxArray *prhs[])
+void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
-    double *u;
-    double *v;
-    double *x;
-    double *y;
-    double *F;
-    int m; // number of rows
-    int n; // number of columns
-    int N; // number of points on line
-    
-    /*  check for proper number of arguments */
-    if(nrhs!=4)
+    /* Check for proper number of arguments */
+    if (nrhs != 4)
     {
-        mexErrMsgIdAndTxt( "MATLAB:ContourForceArray:invalidNumInputs",
-                "Four inputs required.");
+        mexErrMsgIdAndTxt("AGSM:ContourForceArray:invalidNumInputs", "Four inputs required: u, v, x, y.");
     }
-    if(nlhs>1)
+    if (nlhs > 1)
     {
-        mexErrMsgIdAndTxt( "MATLAB:ContourForceArray:invalidNumOutputs",
-                "At most one output.");
-    }
-    
-    /*  get u and v  */
-    u=mxGetPr(prhs[0]);
-    v=mxGetPr(prhs[1]);
-    m=(int)mxGetM(prhs[0]);
-    n=(int)mxGetN(prhs[0]);
-    if(m!=mxGetM(prhs[1]) || n!=mxGetN(prhs[1]))
-    {
-        mexErrMsgIdAndTxt( "MATLAB:ContourForceArray:invalidInputDimension",
-                "Input u and v should have same dimensions.");
-    }
-    
-    /*  get x and y  */
-    x=mxGetPr(prhs[2]);
-    y=mxGetPr(prhs[3]);
-    N=mxGetN(prhs[2]);
-    if(mxGetM(prhs[2])!=1 || mxGetM(prhs[3])!=1 || mxGetN(prhs[3])!=N)
-    {
-        mexErrMsgIdAndTxt( "MATLAB:ContourForceArray:invalidInputDimension",
-                "Input x and y should have same dimensions 1*N.");
+        mexErrMsgIdAndTxt("AGSM:ContourForceArray:invalidNumOutputs", "At most one output.");
     }
 
-    /*  output  */
+    double *u = mxGetPr(prhs[0]);
+    double *v = mxGetPr(prhs[1]);
+    int m = (int)mxGetM(prhs[0]);
+    int n = (int)mxGetN(prhs[0]);
+
+    if (m != mxGetM(prhs[1]) || n != mxGetN(prhs[1]))
+    {
+        mexErrMsgIdAndTxt("AGSM:ContourForceArray:invalidInputDimension", "Input u and v must have same dimensions.");
+    }
+
+    double *x = mxGetPr(prhs[2]);
+    double *y = mxGetPr(prhs[3]);
+    int N = (int)mxGetN(prhs[2]);
+
+    if (mxGetM(prhs[2]) != 1 || mxGetM(prhs[3]) != 1 || mxGetN(prhs[3]) != N)
+    {
+        mexErrMsgIdAndTxt("AGSM:ContourForceArray:invalidInputDimension", "Input x and y must have same dimensions 1xN.");
+    }
+
     plhs[0] = mxCreateDoubleMatrix(N, 2, mxREAL);
-    F=mxGetPr(plhs[0]);
-    
-    /*  call the C++ subroutine  */
-    getForceArray(u,v,x,y,m,n,N,F);
+    double *F = mxGetPr(plhs[0]);
 
+    getForceArray(u, v, x, y, m, n, N, F);
 }

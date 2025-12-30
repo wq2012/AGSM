@@ -11,14 +11,19 @@
 %
 % For commercial use, please contact the authors.
 
-function h=gaussian3(FS)
+function h = gaussian3(FS)
+% GAUSSIAN3 Generate a 3D Gaussian filter kernel.
+%    h = gaussian3(FS) creates a normalized 3D Gaussian kernel.
+%
+%    Inputs:
+%        FS - Gaussian filter size (assumed to be odd).
+%
+%    Outputs:
+%        h - 3D filter kernel of size FS x FS x FS.
 
-%%  3D Gaussian filter
-%   FS: Gaussian filter size 
-%   h: 3D filter of size FS*FS*FS
-
-sig=FS/(4*sqrt(2*log(2)));
-FS=(FS-1)/2;
-[x,y,z]=ndgrid(-FS:FS,-FS:FS,-FS:FS);
-h=exp(-(x.*x/2/sig^2 + y.*y/2/sig^2 + z.*z/2/sig^2));
-h=h/sum(h(:));
+    sig = FS / (4 * sqrt(2 * log(2)));
+    FS = (FS - 1) / 2;
+    [x, y, z] = ndgrid(-FS:FS, -FS:FS, -FS:FS);
+    h = exp(-(x.*x / 2 / sig^2 + y.*y / 2 / sig^2 + z.*z / 2 / sig^2));
+    h = h / sum(h(:));
+end

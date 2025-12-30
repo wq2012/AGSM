@@ -8,14 +8,11 @@
  * The active geometric shape model: A new robust deformable shape model and its applications, 
  * Computer Vision and Image Understanding, Volume 116, Issue 12, December 2012, Pages 1178-1194, 
  * ISSN 1077-3142, 10.1016/j.cviu.2012.08.004. 
- *
- * Usage:
- *     H=CircleHoughTransform(I,rmin,rmax,P)
- *         I: 2D binary image 
- *         rmin: smallest radius to be considered
- *         rmax: largest radius to be considered
- *         P: precision
- *             e.g. P=5 means step size is 1/5=0.2
+ */
+
+/**
+ * H = CircleHoughTransform(I, rmin, rmax, P)
+ * This function performs a 3D Circle Hough Transform on an image.
  */
 
 #include "mex.h"
@@ -26,115 +23,100 @@
 
 using namespace std;
 
-double myround(double a)
+/**
+ * Custom rounding function.
+ */
+double custom_round(double a)
 {
-    if(a-floor(a)>0.5) return floor(a)+1;
+    if (a - floor(a) > 0.5) return floor(a) + 1;
     else return floor(a);
 }
 
+/**
+ * Calculate the flat index for the 3D Hough accumulator.
+ */
 long H_index(long y, long x, long r, const mwSize *dim)
 {
-    long i=(y-1)+(x-1)*(long)dim[0]+(r-1)*(long)dim[0]*(long)dim[1];
-    if(i>=(long)dim[0]*(long)dim[1]*(long)dim[2])
+    long i = (y - 1) + (x - 1) * (long)dim[0] + (r - 1) * (long)dim[0] * (long)dim[1];
+    if (i >= (long)dim[0] * (long)dim[1] * (long)dim[2])
     {
-        cout<<"Error: Index out of bound!"<<endl;
-        return 0;
+        return -1; // Out of bounds
     }
     return i;
 }
 
+/**
+ * Core Hough Transform logic.
+ */
 void hough(double *I, int m, int n, double rmin, double rmax, const mwSize* dim, double P, double *H)
 {
-    cout<<"Running Hough transform ..."<<endl;
-    long i,j;
-    double x_index, y_index, r_index, xx, yy, r;
+    mexPrintf("Running Hough transform ...\n");
     
-    for(i=1;i<=m;i++)
+    for (int i = 1; i <= m; i++)
     {
-        for(j=1;j<=n;j++)
+        for (int j = 1; j <= n; j++)
         {
-            if(I[(i-1)+(j-1)*m]<0.5) continue;
-            for(x_index=1;x_index<=dim[1];x_index++)
+            if (I[(i - 1) + (j - 1) * m] < 0.5) continue;
+            
+            for (int x_index = 1; x_index <= (int)dim[1]; x_index++)
             {
-                xx=(x_index-1)/P+1;
-                for(y_index=1;y_index<=dim[0];y_index++)
+                double xx = (x_index - 1) / P + 1;
+                for (int y_index = 1; y_index <= (int)dim[0]; y_index++)
                 {
-                    yy=(y_index-1)/P+1;
-                    r=sqrt((xx-j)*(xx-j)+(yy-i)*(yy-i));
-                    r=myround(r*P)/P;
-                    if(r<rmin || r>rmax) continue;
-                    r_index=(r-rmin)*P+1;
-                    H[ H_index((long)y_index,(long)x_index,(long)r_index,dim) ]=H[ H_index((long)y_index,(long)x_index,(long)r_index,dim) ]+1;
+                    double yy = (y_index - 1) / P + 1;
+                    double r = sqrt((xx - j) * (xx - j) + (yy - i) * (yy - i));
+                    r = custom_round(r * P) / P;
+                    
+                    if (r < rmin || r > rmax) continue;
+                    
+                    int r_index = (int)((r - rmin) * P + 1.5); // Adjusted for stability
+                    if (r_index > (int)dim[2]) continue;
+                    
+                    long idx = H_index((long)y_index, (long)x_index, (long)r_index, dim);
+                    if (idx != -1) H[idx]++;
                 }
             }
         }
     }
 }
 
-void mexFunction( int nlhs, mxArray *plhs[],
-        int nrhs, const mxArray *prhs[])
+void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
-    // check input
-    if(nrhs!=4)
+    /* Check input */
+    if (nrhs != 4)
     {
-        mexErrMsgIdAndTxt( "MATLAB:CircleHoughTransform:invalidNumInputs",
-                "Four inputs required.");
+        mexErrMsgIdAndTxt("AGSM:CircleHoughTransform:invalidNumInputs", "Four inputs required: I, rmin, rmax, P.");
     }
-    if(nlhs!=1)
+    if (nlhs != 1)
     {
-        mexErrMsgIdAndTxt( "MATLAB:CircleHoughTransform:invalidNumOutputs",
-                "One output required.");
+        mexErrMsgIdAndTxt("AGSM:CircleHoughTransform:invalidNumOutputs", "One output required: H.");
     }
     
-    // get I
-    double *I=mxGetPr(prhs[0]);
-    int m=(int)mxGetM(prhs[0]);
-    int n=(int)mxGetN(prhs[0]);
+    double *I = mxGetPr(prhs[0]);
+    int m = (int)mxGetM(prhs[0]);
+    int n = (int)mxGetN(prhs[0]);
     
-    if(m<5 || n<5)
+    if (m < 5 || n < 5)
     {
-        mexErrMsgIdAndTxt( "MATLAB:CircleHoughTransform:matrixTooSmall",
-                "Input matrix is too small.");
+        mexErrMsgIdAndTxt("AGSM:CircleHoughTransform:matrixTooSmall", "Input matrix is too small.");
     }
     
-    // get rmin and rmax
-    if( !mxIsDouble(prhs[1]) || mxIsComplex(prhs[1]) ||
-            mxGetN(prhs[1])*mxGetM(prhs[1])!=1 )
-    {
-        mexErrMsgIdAndTxt( "MATLAB:CircleHoughTransform:rminNotScalar",
-                "Input rmin must be a scalar.");
-    }
-    double rmin=mxGetScalar(prhs[1]);
+    double rmin = mxGetScalar(prhs[1]);
+    double rmax = mxGetScalar(prhs[2]);
+    double P = mxGetScalar(prhs[3]);
     
-    if( !mxIsDouble(prhs[2]) || mxIsComplex(prhs[2]) ||
-            mxGetN(prhs[2])*mxGetM(prhs[2])!=1 )
-    {
-        mexErrMsgIdAndTxt( "MATLAB:CircleHoughTransform:rmaxNotScalar",
-                "Input rmax must be a scalar.");
-    }
-    double rmax=mxGetScalar(prhs[2]);
+    /* Set output dimensions */
+    mwSize *dim = new mwSize[3];
+    dim[0] = (mwSize)((m - 1) * P + 1);
+    dim[1] = (mwSize)((n - 1) * P + 1);
+    dim[2] = (mwSize)((rmax - rmin) * P + 1);
     
-    // get P
-    if( !mxIsDouble(prhs[3]) || mxIsComplex(prhs[3]) ||
-            mxGetN(prhs[3])*mxGetM(prhs[3])!=1 )
-    {
-        mexErrMsgIdAndTxt( "MATLAB:CircleHoughTransform:PNotScalar",
-                "Input P must be a scalar.");
-    }
-    double P=mxGetScalar(prhs[3]);
-    
-    // set output
-    mwSize *dim=new mwSize[3];
-    dim[0]=(m-1)*P+1;
-    dim[1]=(n-1)*P+1;
-    dim[2]=((int)rmax-(int)rmin)*P+1;
-    cout<<"Circle Hough transform, size of volume: "<<dim[0]<<"*"<<dim[1]<<"*"<<dim[2]<<endl;
+    mexPrintf("Circle Hough transform, size of volume: %d * %d * %d\n", dim[0], dim[1], dim[2]);
     plhs[0] = mxCreateNumericArray(3, dim, mxDOUBLE_CLASS, mxREAL);
+    double *H = mxGetPr(plhs[0]);
     
-    double *H=mxGetPr(plhs[0]);
-    
-    // run C++ function
-    hough(I,m,n,rmin,rmax,dim,P,H);
+    /* Run Hough algorithm */
+    hough(I, m, n, rmin, rmax, dim, P, H);
     
     delete[] dim;
 }

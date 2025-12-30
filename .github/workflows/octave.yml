@@ -23,16 +23,16 @@ jobs:
     - name: Run line demo
       run: |
         cd code/line_fitting
-        octave --no-gui demo_line_fitting.m
+        octave --no-gui --eval "pkg load image; demo_line_fitting"
     - name: Run circle demo
       run: |
         cd code/circle_fitting
-        octave --no-gui demo_circle_fitting.m
+        octave --no-gui --eval "pkg load image; demo_circle_fitting"
     - name: Run ellipse demo
       run: |
         cd code/arbitrary_ellipse_fitting
-        octave --no-gui demo_ellipse_fitting.m
+        octave --no-gui --eval "pkg load image; demo_ellipse_fitting"
     - name: Run spline contour demo
       run: |
         cd code/spline_contour_fitting
-        octave --no-gui demo_spline_contour_fitting.m
+        octave --no-gui --eval "pkg load image; demo_spline_contour_fitting"

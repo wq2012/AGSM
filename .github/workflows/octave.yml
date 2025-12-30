@@ -20,6 +20,10 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y octave octave-dev octave-image
+    - name: Compile
+      run: |
+        cd code
+        octave --no-gui compile.m
     - name: Run line demo
       run: |
         cd code/line_fitting

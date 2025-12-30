@@ -1,4 +1,4 @@
-function [theta_Hough,s_Hough]=hough_line(I)
+function [theta_Hough,s_Hough]=agsm_hough_line(I)
 
 [H, theta_Hough, s_Hough] = hough(I>0);
 h=fspecial('gaussian',10,3);

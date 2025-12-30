@@ -15,8 +15,18 @@
 % For commercial use, please contact the authors.
 
 clear;clc;close all;
+addpath('..');
 addpath('../force_field');
-rng('shuffle');
+if is_octave()
+    rand('state',sum(100*clock));
+else
+    rng('shuffle');
+end
+
+if is_octave()
+    % prevent opening figures in headless mode
+    set(0, 'defaultfigurevisible', 'off');
+end
 
 %% 1. experiment set up
 % image size = 400*500
@@ -139,7 +149,7 @@ end
 theta_RTLS=mod(theta_RTLS,2*pi);
 
 % Hough transform
-[theta_Hough,s_Hough]=hough_line(I);
+[theta_Hough,s_Hough]=agsm_hough_line(I);
 
 if s_Hough*s0<0
     s_Hough=-s_Hough;

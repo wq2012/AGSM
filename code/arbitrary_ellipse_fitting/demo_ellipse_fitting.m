@@ -15,9 +15,19 @@
 % For commercial use, please contact the authors. 
 
 clear;clc;close all;
+addpath('..');
 addpath('../force_field');
 addpath('../math');
-rng('shuffle');
+if is_octave()
+    rand('state',sum(100*clock));
+else
+    rng('shuffle');
+end
+
+if is_octave()
+    % prevent opening figures in headless mode
+    set(0, 'defaultfigurevisible', 'off');
+end
 
 %% 1. experiment set up
 % image size = 400*500

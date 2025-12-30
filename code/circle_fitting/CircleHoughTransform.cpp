@@ -32,7 +32,7 @@ double myround(double a)
     else return floor(a);
 }
 
-long H_index(long y, long x, long r, int *dim)
+long H_index(long y, long x, long r, const mwSize *dim)
 {
     long i=(y-1)+(x-1)*(long)dim[0]+(r-1)*(long)dim[0]*(long)dim[1];
     if(i>=(long)dim[0]*(long)dim[1]*(long)dim[2])
@@ -43,7 +43,7 @@ long H_index(long y, long x, long r, int *dim)
     return i;
 }
 
-void hough(double *I, int m, int n, double rmin, double rmax, int* dim, double P, double *H)
+void hough(double *I, int m, int n, double rmin, double rmax, const mwSize* dim, double P, double *H)
 {
     cout<<"Running Hough transform ..."<<endl;
     long i,j;
@@ -124,7 +124,7 @@ void mexFunction( int nlhs, mxArray *plhs[],
     double P=mxGetScalar(prhs[3]);
     
     // set output
-    int *dim=new int[3];
+    mwSize *dim=new mwSize[3];
     dim[0]=(m-1)*P+1;
     dim[1]=(n-1)*P+1;
     dim[2]=((int)rmax-(int)rmin)*P+1;

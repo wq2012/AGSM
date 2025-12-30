@@ -52,7 +52,11 @@ H=CircleHoughTransform(I,rmin,rmax,P);
 %% gaussian filtering
 h=gaussian3(FS);
 fprintf('Performing 3D Gaussian filtering ... \n');
-H=imfilter(H,h);
+if is_octave()
+    H=convn(H,h,'same');
+else
+    H=imfilter(H,h);
+end
 
 %% get best parameters
 [~,index]=max(H(:));

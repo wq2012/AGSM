@@ -1,4 +1,7 @@
-# AGSM: Active Geometric Shape Models [![View Active geometric shape models on File Exchange](https://www.mathworks.com/matlabcentral/images/matlab-file-exchange.svg)](https://www.mathworks.com/matlabcentral/fileexchange/38358-active-geometric-shape-models)
+# AGSM: Active Geometric Shape Models
+
+[![View Active geometric shape models on File Exchange](https://www.mathworks.com/matlabcentral/images/matlab-file-exchange.svg)](https://www.mathworks.com/matlabcentral/fileexchange/38358-active-geometric-shape-models)
+[![Octave application](https://github.com/wq2012/AGSM/actions/workflows/octave.yml/badge.svg)](https://github.com/wq2012/AGSM/actions/workflows/octave.yml)
 
 ## Overview
 

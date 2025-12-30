@@ -24,6 +24,13 @@ jobs:
       run: |
         cd code
         octave --no-gui compile.m
+    - name: Run unit tests
+      run: |
+        export XDG_RUNTIME_DIR=/tmp/runtime-runner
+        mkdir -p $XDG_RUNTIME_DIR
+        chmod 700 $XDG_RUNTIME_DIR
+        cd code/tests
+        octave --no-gui --eval "pkg load image; run_tests"
     - name: Run line demo
       run: |
         cd code/line_fitting

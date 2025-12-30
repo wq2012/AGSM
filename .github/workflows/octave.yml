@@ -1,0 +1,38 @@
+
+# This workflow will install Octave and run unit tests and the demos
+
+name: Octave application
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y octave octave-dev
+    - name: Run line demo
+      run: |
+        cd line_fitting
+        octave --no-gui demo_line_fitting.m
+    - name: Run circle demo
+      run: |
+        cd circle_fitting
+        octave --no-gui demo_circle_fitting.m
+    - name: Run ellipse demo
+      run: |
+        cd arbitrary_ellipse_fitting
+        octave --no-gui demo_ellipse_fitting.m
+    - name: Run spline contour demo
+      run: |
+        cd spline_contour_fitting
+        octave --no-gui demo_spline_contour_fitting.m

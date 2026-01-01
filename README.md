@@ -77,11 +77,12 @@ The test suite covers math utilities, force field calculations, and all fitting 
 ## Copyright and Citation
 
 
-> Copyright (C) 2012 Quan Wang <wangq10@rpi.edu>,
+```
+Copyright (C) 2012 Quan Wang <wangq10@rpi.edu>,
 Signal Analysis and Machine Perception Laboratory,
 Department of Electrical, Computer, and Systems Engineering,
 Rensselaer Polytechnic Institute, Troy, NY 12180, USA
-
+```
 
 If you use this software for academic purposes, please cite our papers:
 
